@@ -81,6 +81,10 @@ public class TabNavigator implements Navigator {
                         String tabBarModuleName = options.getString("tabBarModuleName");
                         bundle.putString("tabBarModuleName", tabBarModuleName);
                         tabBarFragment.setTabBarProvider(new ReactTabBarProvider());
+                        // Enable left-side tabBar on tablet
+                        if (options.hasKey("tabBarToLeft") && options.getBoolean("tabBarToLeft")) {
+                           tabBarFragment.setLeftTabBarEnable();
+                        }
                     }
 
                     if (options.hasKey("sizeIndeterminate")) {

@@ -1,5 +1,6 @@
 package com.reactnative.hybridnavigation;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.reactnative.hybridnavigation.Constants.ACTION_SET_TAB_ITEM;
 import static com.reactnative.hybridnavigation.Constants.ACTION_UPDATE_TAB_BAR;
 import static com.reactnative.hybridnavigation.Constants.ARG_ACTION;
@@ -15,11 +16,15 @@ import static com.reactnative.hybridnavigation.HBDEventEmitter.ON_COMPONENT_RESU
 import static com.reactnative.hybridnavigation.Parameters.mergeOptions;
 
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.uimanager.PixelUtil;
 import com.navigation.androidx.AwesomeFragment;
 import com.navigation.androidx.DefaultTabBarProvider;
 import com.navigation.androidx.FragmentHelper;
@@ -54,6 +59,27 @@ public class ReactTabBarFragment extends TabBarFragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             options = savedInstanceState.getBundle(SAVED_OPTIONS);
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View root, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(root, savedInstanceState);
+        if (leftTabBarEnable) {
+            int tabWidth = Math.round(PixelUtil.toPixelFromDIP(60));
+            ReactTabBar tabBar = getTabBar();
+            if (tabBar != null) {
+                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(tabWidth, MATCH_PARENT);
+                layoutParams.gravity = Gravity.LEFT;
+                tabBar.setLayoutParams(layoutParams);
+                FrameLayout container = (FrameLayout) tabBar.getChildAt(0);
+                FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+                container.setLayoutParams(lp);
+                int count = container.getChildCount();
+                for (int i = 0; i < count; i++) {
+                    container.getChildAt(i).setLayoutParams(lp);
+                }
+            }
         }
     }
 
@@ -291,6 +317,12 @@ public class ReactTabBarFragment extends TabBarFragment {
 
     public Style getStyle() {
         return mStyle;
+    }
+
+    private boolean leftTabBarEnable = false;
+
+    public void setLeftTabBarEnable() {
+        leftTabBarEnable = true;
     }
 
 }
