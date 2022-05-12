@@ -66,20 +66,27 @@ public class ReactTabBarFragment extends TabBarFragment {
     public void onViewCreated(@NonNull View root, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(root, savedInstanceState);
         if (leftTabBarEnable) {
-            int tabWidth = Math.round(PixelUtil.toPixelFromDIP(60));
-            ReactTabBar tabBar = getTabBar();
-            if (tabBar != null) {
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(tabWidth, MATCH_PARENT);
-                layoutParams.gravity = Gravity.LEFT;
-                tabBar.setLayoutParams(layoutParams);
-                FrameLayout container = (FrameLayout) tabBar.getChildAt(0);
-                FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
-                container.setLayoutParams(lp);
-                int count = container.getChildCount();
-                for (int i = 0; i < count; i++) {
-                    container.getChildAt(i).setLayoutParams(lp);
+            root.post(() -> {
+                int tabWidth = Math.round(PixelUtil.toPixelFromDIP(60));
+                ReactTabBar tabBar = getTabBar();
+                if (tabBar != null) {
+                    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(tabWidth, MATCH_PARENT);
+                    layoutParams.gravity = Gravity.LEFT;
+                    tabBar.setLayoutParams(layoutParams);
+                    FrameLayout container = (FrameLayout) tabBar.getChildAt(0);
+                    layoutParams = new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT);
+                    container.setLayoutParams(layoutParams);
+                    int count = container.getChildCount();
+                    for (int i = 0; i < count; i++) {
+                        container.getChildAt(i).setLayoutParams(layoutParams);
+                    }
+                    FrameLayout contentView = root.findViewById(R.id.tabs_content);
+                    layoutParams = (FrameLayout.LayoutParams) contentView.getLayoutParams();
+                    layoutParams.width = root.getWidth() - tabWidth;
+                    layoutParams.gravity = Gravity.RIGHT;
+                    contentView.setLayoutParams(layoutParams);
                 }
-            }
+            });
         }
     }
 
