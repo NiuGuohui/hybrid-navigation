@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.uimanager.PixelUtil;
 import com.navigation.androidx.AwesomeFragment;
+import com.navigation.androidx.AwesomeToolbar;
 import com.navigation.androidx.DefaultTabBarProvider;
 import com.navigation.androidx.FragmentHelper;
 import com.navigation.androidx.Style;
@@ -88,6 +89,12 @@ public class ReactTabBarFragment extends TabBarFragment {
                 }
             });
         }
+    }
+
+    @Nullable
+    @Override
+    protected AwesomeToolbar onCreateToolbar(View parent) {
+        return leftTabBarEnable ? null : super.onCreateToolbar(parent);
     }
 
     @Override
