@@ -87,9 +87,11 @@ public class ReactTabBarFragment extends TabBarFragment {
                     layoutParams.width = root.getWidth() - tabWidth;
                     layoutParams.gravity = Gravity.RIGHT;
                     contentView.setLayoutParams(layoutParams);
-                    int uiOptions = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-                    Window win = getWindow();
-                    if (win != null) win.getDecorView().setSystemUiVisibility(uiOptions);
+                    if (hideNavigationBar) {
+                        int uiOptions = (View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                        Window win = getWindow();
+                        if (win != null) win.getDecorView().setSystemUiVisibility(uiOptions);
+                    }
                 }
             });
         }
@@ -338,9 +340,14 @@ public class ReactTabBarFragment extends TabBarFragment {
     }
 
     private boolean leftTabBarEnable = false;
+    private boolean hideNavigationBar = false;
 
     public void setLeftTabBarEnable() {
         leftTabBarEnable = true;
+    }
+
+    public void hideNavigationBar() {
+        hideNavigationBar = true;
     }
 
 }

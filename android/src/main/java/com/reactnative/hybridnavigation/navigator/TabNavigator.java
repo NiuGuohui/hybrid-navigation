@@ -85,6 +85,10 @@ public class TabNavigator implements Navigator {
                         if (options.hasKey("tabBarToLeft") && options.getBoolean("tabBarToLeft")) {
                            tabBarFragment.setLeftTabBarEnable();
                         }
+                        // Hide navigation bar
+                        if (options.hasKey("navigationBarHiddenAndroid") && options.getBoolean("navigationBarHiddenAndroid")) {
+                            tabBarFragment.hideNavigationBar();
+                        }
                     }
 
                     if (options.hasKey("sizeIndeterminate")) {
