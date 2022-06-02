@@ -63,7 +63,7 @@ public class Garden {
     boolean extendedLayoutIncludesTopBar;
 
     boolean forceTransparentDialogWindow;
-
+    
     Garden(@NonNull HybridFragment fragment, Style style) {
         // 构造 garden 实例时，Toolbar 还没有被创建
 
@@ -83,13 +83,13 @@ public class Garden {
         if (!TextUtils.isEmpty(screenColor)) {
             style.setScreenBackgroundColor(Color.parseColor(screenColor));
         }
-        
-        this.forceTransparentDialogWindow = options.getBoolean("forceTransparentDialogWindow");
 
+        this.forceTransparentDialogWindow = options.getBoolean("forceTransparentDialogWindow");
+        
         applyOptions(options);
     }
 
-    void configureToolbar() {
+    void setupToolbar() {
 
         if (fragment.getView() == null || fragment.getContext() == null) {
             return;
@@ -112,7 +112,7 @@ public class Garden {
         } else if (rightBarButtonItem != null) {
             setRightBarButtonItem(rightBarButtonItem);
         }
-        
+
         Bundle leftBarButtonItem = options.getBundle("leftBarButtonItem");
         ArrayList<Bundle> leftBarButtonItems = options.getParcelableArrayList("leftBarButtonItems");
         if (leftBarButtonItems != null) {
@@ -124,26 +124,27 @@ public class Garden {
 
     void setTitleItem(@NonNull Bundle titleItem) {
         String moduleName = titleItem.getString("moduleName");
-        if (moduleName == null) {
-            String title = titleItem.getString("title");
-            fragment.setTitle(title);
+        if (moduleName != null) {
+            return;
         }
+        String title = titleItem.getString("title");
+        fragment.setTitle(title);
     }
 
     void setLeftBarButtonItems(ArrayList<Bundle> items) {
-        if (items != null) {
-            fragment.setLeftBarButtonItems(barButtonItemsFromBundle(items));
-        } else {
+        if (items == null) {
             fragment.setLeftBarButtonItems(null);
+            return;
         }
+        fragment.setLeftBarButtonItems(barButtonItemsFromBundle(items));
     }
 
     void setRightBarButtonItems(ArrayList<Bundle> items) {
-        if (items != null) {
-            fragment.setRightBarButtonItems(barButtonItemsFromBundle(items));
-        } else {
+        if (items == null) {
             fragment.setRightBarButtonItems(null);
+            return;
         }
+        fragment.setRightBarButtonItems(barButtonItemsFromBundle(items));
     }
 
     private ToolbarButtonItem[] barButtonItemsFromBundle(ArrayList<Bundle> items) {
@@ -156,19 +157,19 @@ public class Garden {
     }
 
     void setLeftBarButtonItem(@Nullable Bundle item) {
-        if (item != null) {
-            fragment.setLeftBarButtonItem(barButtonItemFromBundle(item));
-        } else {
+        if (item == null) {
             fragment.setLeftBarButtonItem(null);
+            return;
         }
+        fragment.setLeftBarButtonItem(barButtonItemFromBundle(item));
     }
 
     void setRightBarButtonItem(@Nullable Bundle item) {
-        if (item != null) {
-            fragment.setRightBarButtonItem(barButtonItemFromBundle(item));
-        } else {
+        if (item == null) {
             fragment.setRightBarButtonItem(null);
+            return;
         }
+        fragment.setRightBarButtonItem(barButtonItemFromBundle(item));
     }
 
     private ToolbarButtonItem barButtonItemFromBundle(@NonNull Bundle item) {
@@ -268,7 +269,6 @@ public class Garden {
 
     void updateOptions(@NonNull ReadableMap readableMap) {
         Bundle patches = toBundle(readableMap);
-
         applyOptions(patches);
 
         if (readableMap.hasKey("screenBackgroundColor")) {
@@ -291,13 +291,9 @@ public class Garden {
         if (shouldUpdateNavigationBar(readableMap)) {
             fragment.setNeedsNavigationBarAppearanceUpdate();
         }
-
-        if (readableMap.hasKey("passThroughTouches")) {
-            boolean passThroughTouches = readableMap.getBoolean("passThroughTouches");
-            setPassThroughTouches(passThroughTouches);
-        }
-
+        
         Bundle options = mergeOptions(fragment.getOptions(), patches);
+        fragment.setOptions(options);
 
         if (readableMap.hasKey("leftBarButtonItem")) {
             Bundle bundle = options.getBundle("leftBarButtonItem");
@@ -323,8 +319,6 @@ public class Garden {
             Bundle titleItem = options.getBundle("titleItem");
             setTitleItem(titleItem);
         }
-
-        fragment.setOptions(options);
     }
 
     private boolean shouldUpdateStatusBar(@NonNull ReadableMap readableMap) {
@@ -339,9 +333,9 @@ public class Garden {
 
     private boolean shouldUpdateToolbar(@NonNull ReadableMap readableMap) {
         String[] keys = new String[]{
-                "topBarStyle",
-                "topBarColor", "topBarAlpha", "topBarShadowHidden", "topBarTintColor",
-                "titleTextSize", "titleTextColor", "backButtonHidden"
+            "topBarStyle",
+            "topBarColor", "topBarAlpha", "topBarShadowHidden", "topBarTintColor",
+            "titleTextSize", "titleTextColor", "backButtonHidden"
         };
 
         for (String key : keys) {
@@ -361,12 +355,5 @@ public class Garden {
         }
         return false;
     }
-
-    void setPassThroughTouches(boolean passThroughTouches) {
-        View view = fragment.getView();
-        if (view instanceof HBDReactRootView) {
-            ((HBDReactRootView) view).setShouldConsumeTouchEvent(!passThroughTouches);
-        }
-    }
-
+    
 }

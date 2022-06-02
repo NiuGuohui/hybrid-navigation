@@ -1,5 +1,13 @@
 package com.reactnative.hybridnavigation;
 
+import static com.reactnative.hybridnavigation.Constants.ARG_MODULE_NAME;
+import static com.reactnative.hybridnavigation.Constants.ARG_OPTIONS;
+import static com.reactnative.hybridnavigation.Constants.ARG_PROPS;
+import static com.reactnative.hybridnavigation.Constants.ARG_SCENE_ID;
+
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -13,14 +21,11 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.bridge.ReactContext;
 import com.navigation.androidx.AwesomeFragment;
 import com.navigation.androidx.AwesomeToolbar;
+import com.navigation.androidx.BarStyle;
 import com.navigation.androidx.FragmentHelper;
 import com.navigation.androidx.Style;
+import com.navigation.androidx.SystemUI;
 import com.navigation.androidx.TabBarItem;
-
-import static com.reactnative.hybridnavigation.Constants.ARG_MODULE_NAME;
-import static com.reactnative.hybridnavigation.Constants.ARG_OPTIONS;
-import static com.reactnative.hybridnavigation.Constants.ARG_PROPS;
-import static com.reactnative.hybridnavigation.Constants.ARG_SCENE_ID;
 
 /**
  * Created by Listen on 2018/1/15.
@@ -90,14 +95,34 @@ public class HybridFragment extends AwesomeFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        garden.configureToolbar();
-        if (getShowsDialog() && garden.forceTransparentDialogWindow) {
-            Window window = getWindow();
-            assert window != null;
-            window.setDimAmount(0);
-        }
+        garden.setupToolbar();
     }
-    
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        Window window = dialog.getWindow();
+        
+        if (forceTransparentDialogWindow()) {
+            window.setDimAmount(0);
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+        
+        return dialog;
+    }
+
+    @NonNull
+    @Override
+    protected BarStyle preferredStatusBarStyle() {
+        if (getShowsDialog() && forceTransparentDialogWindow()) {
+            if (SystemUI.isStatusBarStyleDark(requireActivity().getWindow())) {
+                return BarStyle.DarkContent;
+            }
+        }
+        return super.preferredStatusBarStyle();
+    }
+
     public Garden getGarden() {
         return garden;
     }
@@ -120,6 +145,15 @@ public class HybridFragment extends AwesomeFragment {
     @Override
     protected boolean hideTabBarWhenPushed() {
         return garden.hidesBottomBarWhenPushed;
+    }
+
+    protected boolean shouldPassThroughTouches() {
+        Bundle options = getOptions();
+        return options.getBoolean("passThroughTouches");
+    }
+
+    protected boolean forceTransparentDialogWindow() {
+        return garden.forceTransparentDialogWindow;
     }
 
     @Override
@@ -151,37 +185,54 @@ public class HybridFragment extends AwesomeFragment {
     @Override
     public void setArguments(@Nullable Bundle args) {
         super.setArguments(args);
-        TabBarItem tabBarItem = getTabBarItem();
-        if (tabBarItem == null && args != null) {
-            Bundle options = args.getBundle(Constants.ARG_OPTIONS);
-            if (options != null) {
-                Bundle tabItem = options.getBundle("tabItem");
-                if (tabItem != null) {
-                    String title = tabItem.getString("title");
-                    if (title != null) {
-                        tabBarItem = new TabBarItem(title);
-                        Bundle icon = tabItem.getBundle("icon");
-                        if (icon != null) {
-                            String uri = icon.getString("uri");
-                            if (uri != null) {
-                                tabBarItem = new TabBarItem(title, uri);
-                                Bundle unselectedIcon = tabItem.getBundle("unselectedIcon");
-                                if (unselectedIcon != null) {
-                                    String unselectedUri = unselectedIcon.getString("uri");
-                                    if (unselectedUri != null) {
-                                        tabBarItem = new TabBarItem(title, uri, unselectedUri);
-                                    }
-                                }
-                            }
-                        }
-                    }
+        setTabBarItemIfNeeded(args);
+    }
 
-                    if (tabBarItem != null) {
-                        setTabBarItem(tabBarItem);
-                    }
-                }
-            }
+    private void setTabBarItemIfNeeded(@Nullable Bundle args) {
+        if (args == null) {
+            return;
         }
+        TabBarItem tabBarItem = getTabBarItem();
+        if (tabBarItem != null) {
+            return;
+        }
+
+        Bundle options = args.getBundle(Constants.ARG_OPTIONS);
+        if (options == null) {
+            return;
+        }
+        Bundle tabItem = options.getBundle("tabItem");
+        if (tabItem == null) {
+            return;
+        }
+        String title = tabItem.getString("title");
+        if (title == null) {
+            return;
+        }
+
+        Bundle icon = tabItem.getBundle("icon");
+        if (icon == null) {
+            setTabBarItem(new TabBarItem(title));
+            return;
+        }
+        String uri = icon.getString("uri");
+        if (uri == null) {
+            setTabBarItem(new TabBarItem(title));
+            return;
+        }
+
+        Bundle unselectedIcon = tabItem.getBundle("unselectedIcon");
+        if (unselectedIcon == null) {
+            setTabBarItem(new TabBarItem(title, uri));
+            return;
+        }
+        String unselectedUri = unselectedIcon.getString("uri");
+        if (unselectedUri == null) {
+            setTabBarItem(new TabBarItem(title, uri));
+            return;
+        }
+
+        setTabBarItem(new TabBarItem(title, uri, unselectedUri));
     }
 
     private Bundle props;
@@ -201,13 +252,13 @@ public class HybridFragment extends AwesomeFragment {
 
     @CallSuper
     public void setAppProperties(@NonNull Bundle props) {
-        if (isAdded()) {
-            props.putString(ARG_SCENE_ID, getSceneId());
-            this.props = props;
-        } else {
+        if (!isAdded()) {
             Bundle args = FragmentHelper.getArguments(this);
             args.putBundle(ARG_PROPS, props);
+            return;
         }
+        props.putString(ARG_SCENE_ID, getSceneId());
+        this.props = props;
     }
 
     public String getModuleName() {

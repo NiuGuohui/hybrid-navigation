@@ -1,5 +1,5 @@
 import { AppRegistry, ComponentProvider } from 'react-native'
-import React, { useEffect, ComponentType, createContext } from 'react'
+import React, { useEffect, createContext } from 'react'
 import { Navigator } from './Navigator'
 import {
   NavigationModule,
@@ -26,15 +26,15 @@ interface Props {
   sceneId: string
 }
 
-function getDisplayName(WrappedComponent: ComponentType<any>) {
+function getDisplayName(WrappedComponent: React.ComponentType<any>) {
   return WrappedComponent.displayName || WrappedComponent.name || 'Component'
 }
 
 export const NavigationContext = createContext<any>(null)
 
 function withNavigator(moduleName: string) {
-  return function (WrappedComponent: ComponentType<any>) {
-    const FC = React.forwardRef((props: Props, ref: React.Ref<ComponentType<any>>) => {
+  return function (WrappedComponent: React.ComponentType<any>) {
+    const FC = React.forwardRef((props: Props, ref: React.Ref<React.ComponentType<any>>) => {
       const { sceneId } = props
 
       const navigator = Navigator.of(sceneId)
@@ -85,7 +85,7 @@ function withNavigator(moduleName: string) {
   }
 }
 
-export type HOC = (WrappedComponent: ComponentType<any>) => ComponentType<any>
+export type HOC = (WrappedComponent: React.ComponentType<any>) => React.ComponentType<any>
 let wrap: HOC | undefined
 
 export class ReactRegistry {
@@ -126,7 +126,7 @@ export class ReactRegistry {
 }
 
 export function withNavigationItem(item: NavigationItem) {
-  return function (WrappedComponent: ComponentType<any>) {
+  return function (WrappedComponent: React.ComponentType<any>): React.ComponentType<any> {
     let navigationItem = (WrappedComponent as any).navigationItem
     if (navigationItem) {
       ;(WrappedComponent as any).navigationItem = { ...navigationItem, ...item }

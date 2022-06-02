@@ -1,3 +1,28 @@
+## 2.10.2 （2022-06-02）
+
+### Android specific
+
+- 修复 `navigationBarHiddenAndroid` 参数对 TabBar 不生效的问题
+
+## 2.10.1 (2022-05-31)
+
+- 更新 typings
+
+## 2.10.0 (2022-05-31)
+
+- 当 `screenBackgroundColor` 包含透明度时，对 Modal 生效
+
+```ts
+export default withBottomModal({ safeAreaColor: '#F3F3F3' })(
+  withNavigationItem({
+    // forceTransparentDialogWindow: true,
+    screenBackgroundColor: '#33000000',
+  })(ReactModal),
+)
+```
+
+`forceTransparentDialogWindow` 会覆盖 `screenBackgroundColor`，使得 Modal 全透明，并尝试适配状态栏的颜色
+
 ## 2.9.0 (2022-05-11)
 
 - 调整传递给 `ReactRegistry.startRegisterComponent` 的 [HOC](https://zh-hans.reactjs.org/docs/higher-order-components.html) 的使用顺序，现在可以通过以下方式全局设置页面特定属性：
