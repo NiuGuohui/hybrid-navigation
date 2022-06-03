@@ -141,7 +141,7 @@ public class TabNavigator implements Navigator {
     @NonNull
     private ArrayList<Bundle> buildChildrenGraph(TabBarFragment tabs) {
         ArrayList<Bundle> children = new ArrayList<>();
-        List<AwesomeFragment> fragments = tabs.getChildFragments();
+        List<AwesomeFragment> fragments = tabs.getChildAwesomeFragments();
         for (int i = 0; i < fragments.size(); i++) {
             AwesomeFragment child = fragments.get(i);
             Bundle graph = getReactBridgeManager().buildRouteGraph(child);
@@ -213,7 +213,7 @@ public class TabNavigator implements Navigator {
         }
 
         StackFragment stackFragment = tabBarFragment.getSelectedFragment().getStackFragment();
-        if (stackFragment != null && stackFragment.getChildFragments().size() > 1) {
+        if (stackFragment != null && stackFragment.getChildAwesomeFragments().size() > 1) {
             stackFragment.popToRootFragment(false);
         }
     }
